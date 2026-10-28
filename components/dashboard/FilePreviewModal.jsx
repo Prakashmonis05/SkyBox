@@ -7,16 +7,19 @@ import {
   Loader2,
   File,
   AlertCircle,
-  ExternalLink
+  ExternalLink,
+  Share2
 } from 'lucide-react';
 import { getFileSignedUrl, downloadFile, formatBytes } from '@/lib/files';
 import { getFileTypeIcon } from './FileItem';
+import ShareCodeModal from './ShareCodeModal';
 
 export default function FilePreviewModal({ isOpen, onClose, file }) {
   const [signedUrl, setSignedUrl] = useState('');
   const [textContent, setTextContent] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [shareCodeOpen, setShareCodeOpen] = useState(false);
 
   useEffect(() => {
     if (isOpen && file) {
@@ -91,6 +94,14 @@ export default function FilePreviewModal({ isOpen, onClose, file }) {
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => setShareCodeOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs transition cursor-pointer"
+            >
+              <Share2 className="w-3.5 h-3.5 text-blue-600" />
+              <span>Share Code</span>
+            </button>
+
             <button
               onClick={() => downloadFile(file)}
               className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 text-white font-semibold text-xs hover:bg-blue-700 shadow-sm shadow-blue-500/20 transition cursor-pointer"
@@ -176,6 +187,12 @@ export default function FilePreviewModal({ isOpen, onClose, file }) {
           )}
         </div>
       </div>
+
+      <ShareCodeModal
+        isOpen={shareCodeOpen}
+        onClose={() => setShareCodeOpen(false)}
+        file={file}
+      />
     </div>
   );
 }

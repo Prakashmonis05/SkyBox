@@ -15,9 +15,11 @@ import {
   FolderInput,
   Star,
   Trash2,
-  MoreVertical
+  MoreVertical,
+  Share2
 } from 'lucide-react';
 import { formatBytes } from '@/lib/files';
+import ShareCodeModal from './ShareCodeModal';
 
 export function getFileTypeIcon(mimeType = '', name = '') {
   const ext = name.split('.').pop()?.toLowerCase();
@@ -54,6 +56,7 @@ export default function FileItem({
   onToggleStar,
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [shareCodeModalOpen, setShareCodeModalOpen] = useState(false);
   const menuRef = useRef(null);
 
   const isTextFile =
@@ -159,6 +162,17 @@ export default function FileItem({
               >
                 <Eye className="w-3.5 h-3.5 text-slate-500" />
                 <span>Open Preview</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  setShareCodeModalOpen(true);
+                }}
+                className="w-full text-left px-3.5 py-2 hover:bg-blue-50 flex items-center gap-2.5 text-blue-600 font-semibold transition cursor-pointer"
+              >
+                <Share2 className="w-3.5 h-3.5" />
+                <span>Share via Code</span>
               </button>
 
               <button
@@ -284,6 +298,17 @@ export default function FileItem({
               <button
                 onClick={() => {
                   setMenuOpen(false);
+                  setShareCodeModalOpen(true);
+                }}
+                className="w-full text-left px-3.5 py-2 hover:bg-blue-50 flex items-center gap-2.5 text-blue-600 font-semibold transition cursor-pointer"
+              >
+                <Share2 className="w-3.5 h-3.5" />
+                <span>Share via Code</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
                   onDownload(file);
                 }}
                 className="w-full text-left px-3.5 py-2 hover:bg-slate-50 flex items-center gap-2.5 text-slate-700 transition cursor-pointer"
@@ -351,6 +376,11 @@ export default function FileItem({
           <span>{formattedDate}</span>
         </div>
       </div>
+      <ShareCodeModal
+        isOpen={shareCodeModalOpen}
+        onClose={() => setShareCodeModalOpen(false)}
+        file={file}
+      />
     </div>
   );
 }

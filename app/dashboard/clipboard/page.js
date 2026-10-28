@@ -13,8 +13,12 @@ import {
   Loader2,
   Sparkles,
   Shield,
-  AlertCircle
+  AlertCircle,
+  Share2,
+  ExternalLink,
+  KeyRound
 } from 'lucide-react';
+import Link from 'next/link';
 import {
   getClipboardItems,
   createClip,
@@ -23,6 +27,7 @@ import {
   deleteClip,
   clearAllClips
 } from '@/lib/clipboard';
+import { createPublicClip } from '@/lib/share';
 
 function ClipCountdown({ expiresAt, onExpire }) {
   const [timeLeft, setTimeLeft] = useState('');
@@ -85,6 +90,8 @@ export default function ClipboardPage() {
   const [saving, setSaving] = useState(false);
   const [copiedId, setCopiedId] = useState(null);
   const [toastMessage, setToastMessage] = useState('');
+  const [publicShareModal, setPublicShareModal] = useState(null);
+  const [copiedModalCode, setCopiedModalCode] = useState(false);
 
   const fetchClips = async () => {
     try {
@@ -137,6 +144,19 @@ export default function ClipboardPage() {
       }, 2500);
     } catch (err) {
       console.error('Copy failed:', err);
+    }
+  };
+
+  const handlePublicShareClip = async (clip) => {
+    try {
+      const res = await createPublicClip({
+        title: clip.title,
+        content: clip.content,
+        minutes: 60,
+      });
+      setPublicShareModal(res);
+    } catch (err) {
+      console.error('Share error:', err);
     }
   };
 
@@ -209,15 +229,27 @@ export default function ClipboardPage() {
           </p>
         </div>
 
-        {clips.length > 0 && (
-          <button
-            onClick={handleClearAll}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 transition cursor-pointer"
+        <div className="flex items-center gap-2">
+          <Link
+            href="/clipboard"
+            target="_blank"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 transition cursor-pointer"
           >
-            <Trash2 className="w-3.5 h-3.5" />
-            <span>Clear All Clips</span>
-          </button>
-        )}
+            <Share2 className="w-3.5 h-3.5" />
+            <span>Public Quick Share</span>
+            <ExternalLink className="w-3 h-3 text-blue-500" />
+          </Link>
+
+          {clips.length > 0 && (
+            <button
+              onClick={handleClearAll}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 transition cursor-pointer"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Clear All</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Add New Clip Input Card */}
@@ -368,6 +400,14 @@ export default function ClipboardPage() {
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
+
+                      <button
+                        onClick={() => handlePublicShareClip(clip)}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition cursor-pointer"
+                        title="Share via 6-digit public code (no login required)"
+                      >
+                        <Share2 className="w-3.5 h-3.5" />
+                      </button>
                     </div>
 
                     <button
@@ -402,6 +442,55 @@ export default function ClipboardPage() {
           </div>
         )}
       </div>
+      {/* Public Share Code Popup Modal */}
+      {publicShareModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl border border-slate-200">
+            <div className="w-12 h-12 rounded-xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center mx-auto">
+              <KeyRound className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="font-bold text-slate-900 text-base">
+                Public Share Code Ready
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Anyone can view or download this clip without login
+              </p>
+            </div>
+            <div className="p-4 rounded-2xl bg-blue-50/70 border border-blue-200">
+              <span className="text-[10px] uppercase tracking-wider text-blue-600 font-bold block mb-1">
+                6-Digit Code
+              </span>
+              <div className="text-3xl font-extrabold tracking-widest font-mono text-blue-700">
+                {publicShareModal.share_code}
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(publicShareModal.share_code);
+                    setCopiedModalCode(true);
+                    setTimeout(() => setCopiedModalCode(false), 2000);
+                  } catch {}
+                }}
+                className="flex-1 py-2.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
+              >
+                {copiedModalCode ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                <span>{copiedModalCode ? 'Copied Code!' : 'Copy Code'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setPublicShareModal(null)}
+                className="py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

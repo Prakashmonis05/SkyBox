@@ -23,6 +23,15 @@ export default function Navbar() {
           <a href="#features" className="hover:text-blue-600 transition">
             Features
           </a>
+          <Link
+            href="/clipboard"
+            className="hover:text-blue-600 transition flex items-center gap-1.5 font-medium"
+          >
+            <span>Clipboard</span>
+            <span className="px-1.5 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-bold rounded-md">
+              No Login
+            </span>
+          </Link>
           <a href="#how-it-works" className="hover:text-blue-600 transition">
             How It Works
           </a>
