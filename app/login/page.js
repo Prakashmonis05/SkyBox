@@ -4,25 +4,29 @@ import { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { Cloud, Lock, Mail, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';
+import { Cloud, Lock, Mail, ArrowRight, AlertCircle, Loader2, CheckCircle2, Clock } from 'lucide-react';
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get('redirectTo') || '/dashboard';
   const queryError = searchParams.get('error');
+  const reason = searchParams.get('reason');
+  const isVerifiedParam = searchParams.get('verified');
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState(queryError || '');
+  const [unverifiedEmail, setUnverifiedEmail] = useState('');
 
   const supabase = createClient();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setErrorMessage('');
+    setUnverifiedEmail('');
     setLoading(true);
 
     try {
@@ -32,8 +36,24 @@ function LoginForm() {
       });
 
       if (error) {
-        setErrorMessage(error.message);
+        const msg = error.message || '';
+        if (
+          msg.toLowerCase().includes('confirm') ||
+          msg.toLowerCase().includes('verify') ||
+          msg.toLowerCase().includes('not confirmed')
+        ) {
+          setUnverifiedEmail(email);
+          setErrorMessage('Your email address has not been verified yet. Please verify your email before accessing your vault.');
+        } else {
+          setErrorMessage(msg);
+        }
         setLoading(false);
+        return;
+      }
+
+      // Check if user email is unconfirmed
+      if (data?.user && !data.user.email_confirmed_at) {
+        router.push(`/verify-email?email=${encodeURIComponent(email)}&redirectTo=${encodeURIComponent(redirectTo)}`);
         return;
       }
 
@@ -89,10 +109,48 @@ function LoginForm() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-6 sm:px-10 shadow-sm border border-slate-200 rounded-2xl">
+          {reason === 'timeout' && (
+            <div className="mb-6 p-4 rounded-xl bg-amber-50 border border-amber-200 flex items-start gap-3 text-sm text-amber-800 animate-in fade-in">
+              <Clock className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold">Session expired</p>
+                <p className="text-xs text-amber-700 mt-0.5">
+                  You were logged out after 60 minutes of inactivity for your security. Please sign in again.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {isVerifiedParam === 'true' && (
+            <div className="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 flex items-start gap-3 text-sm text-emerald-800 animate-in fade-in">
+              <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold">Email Verified</p>
+                <p className="text-xs text-emerald-700 mt-0.5">
+                  Your email has been verified. You can now access your SkyBox storage.
+                </p>
+              </div>
+            </div>
+          )}
+
           {errorMessage && (
-            <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 flex items-start gap-3 text-sm text-red-700">
-              <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
-              <span>{errorMessage}</span>
+            <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-sm text-red-700">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <span>{errorMessage}</span>
+                  {unverifiedEmail && (
+                    <div className="mt-2.5">
+                      <Link
+                        href={`/verify-email?email=${encodeURIComponent(unverifiedEmail)}&redirectTo=${encodeURIComponent(redirectTo)}`}
+                        className="inline-flex items-center gap-1.5 font-semibold text-xs text-blue-600 hover:text-blue-700 underline"
+                      >
+                        Click here to verify your email now &rarr;
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           )}
 

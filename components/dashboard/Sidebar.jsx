@@ -11,12 +11,14 @@ import {
   Trash2,
   Settings,
   X,
-  Database
+  Database,
+  ClipboardList
 } from 'lucide-react';
 
 const navItems = [
   { name: 'Home', href: '/dashboard', icon: HardDrive },
   { name: 'My Files', href: '/dashboard/files', icon: Folder },
+  { name: 'Online Clipboard', href: '/dashboard/clipboard', icon: ClipboardList, badge: '60m' },
   { name: 'Recent', href: '/dashboard/recent', icon: Clock },
   { name: 'Starred', href: '/dashboard/starred', icon: Star },
   { name: 'Trash', href: '/dashboard/trash', icon: Trash2 },
@@ -94,7 +96,14 @@ export default function Sidebar({ isOpen, onClose }) {
                     isActive ? 'text-blue-600' : 'text-slate-400'
                   }`}
                 />
-                <span>{item.name}</span>
+                <div className="flex items-center justify-between w-full">
+                  <span>{item.name}</span>
+                  {item.badge && (
+                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-blue-100 text-blue-700 tracking-wide">
+                      {item.badge}
+                    </span>
+                  )}
+                </div>
               </Link>
             );
           })}

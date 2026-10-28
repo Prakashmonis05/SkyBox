@@ -3,12 +3,16 @@
 import { useState } from 'react';
 import Sidebar from '@/components/dashboard/Sidebar';
 import Header from '@/components/dashboard/Header';
+import SessionTimeoutWatcher from '@/components/dashboard/SessionTimeoutWatcher';
 
 export default function DashboardClientLayout({ user, profile, children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-slate-50 flex">
+      {/* 60-Minute Inactivity Session Watchdog */}
+      <SessionTimeoutWatcher />
+
       {/* Sidebar navigation */}
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 

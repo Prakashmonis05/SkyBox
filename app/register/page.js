@@ -60,7 +60,7 @@ export default function RegisterPage() {
         router.push('/dashboard');
         router.refresh();
       } else {
-        setConfirmationSent(true);
+        router.push(`/verify-email?email=${encodeURIComponent(email)}`);
       }
     } catch (err) {
       setErrorMessage(err.message || 'An unexpected error occurred.');
