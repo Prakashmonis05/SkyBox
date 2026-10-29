@@ -116,6 +116,8 @@ export default function DashboardHomePage() {
     } else if (actionName === 'New Text File' || actionName === 'New Text File (.txt)') {
       setEditingTextFile(null);
       setTextEditorModalOpen(true);
+    } else if (actionName === 'Online Clipboard') {
+      router.push('/dashboard/clipboard');
     }
   };
 

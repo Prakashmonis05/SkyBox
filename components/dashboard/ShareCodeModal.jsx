@@ -49,7 +49,7 @@ export default function ShareCodeModal({ isOpen, onClose, file }) {
   const { icon: FileIcon, color, bg } = getFileTypeIcon(file.mime_type, file.name);
 
   const shareUrl = shareData
-    ? `${typeof window !== 'undefined' ? window.location.origin : ''}/clipboard?code=${encodeURIComponent(
+    ? `${typeof window !== 'undefined' ? window.location.origin : ''}/?code=${encodeURIComponent(
         shareData.share_code
       )}`
     : '';
@@ -163,7 +163,7 @@ export default function ShareCodeModal({ isOpen, onClose, file }) {
 
             {/* Instruction footnote */}
             <p className="text-[11px] text-slate-500 leading-relaxed text-center">
-              Recipients can go to <span className="font-semibold text-slate-700">/clipboard</span> on any device, enter this code, and download your file directly without logging in.
+              Recipients can open this link or visit the home page, enter this code, and download your file directly without logging in.
             </p>
           </div>
         ) : null}

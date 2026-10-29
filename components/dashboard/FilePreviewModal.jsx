@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   X,
   Download,
@@ -12,14 +13,13 @@ import {
 } from 'lucide-react';
 import { getFileSignedUrl, downloadFile, formatBytes } from '@/lib/files';
 import { getFileTypeIcon } from './FileItem';
-import ShareCodeModal from './ShareCodeModal';
 
 export default function FilePreviewModal({ isOpen, onClose, file }) {
+  const router = useRouter();
   const [signedUrl, setSignedUrl] = useState('');
   const [textContent, setTextContent] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [shareCodeOpen, setShareCodeOpen] = useState(false);
 
   useEffect(() => {
     if (isOpen && file) {
@@ -95,7 +95,10 @@ export default function FilePreviewModal({ isOpen, onClose, file }) {
 
           <div className="flex items-center gap-2 shrink-0">
             <button
-              onClick={() => setShareCodeOpen(true)}
+              onClick={() => {
+                onClose?.();
+                router.push(`/dashboard/clipboard?shareFileId=${encodeURIComponent(file.id)}`);
+              }}
               className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs transition cursor-pointer"
             >
               <Share2 className="w-3.5 h-3.5 text-blue-600" />
@@ -187,12 +190,6 @@ export default function FilePreviewModal({ isOpen, onClose, file }) {
           )}
         </div>
       </div>
-
-      <ShareCodeModal
-        isOpen={shareCodeOpen}
-        onClose={() => setShareCodeOpen(false)}
-        file={file}
-      />
     </div>
   );
 }

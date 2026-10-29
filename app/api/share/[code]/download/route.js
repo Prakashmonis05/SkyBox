@@ -55,6 +55,31 @@ export async function GET(request, { params }) {
 
     // If it's a cloud storage file
     if (clip.is_cloud_file && clip.storage_path) {
+      // If stored in Cloudinary
+      if (
+        clip.storage_path.startsWith('http://') ||
+        clip.storage_path.startsWith('https://')
+      ) {
+        try {
+          const fileRes = await fetch(clip.storage_path);
+          if (fileRes.ok) {
+            const fileBlob = await fileRes.blob();
+            return new Response(fileBlob, {
+              headers: {
+                'Content-Type': clip.mime_type || 'application/octet-stream',
+                'Content-Disposition': `attachment; filename="${encodeURIComponent(
+                  clip.file_name || 'download'
+                )}"`,
+              },
+            });
+          }
+        } catch (fetchErr) {
+          console.warn('Failed to stream Cloudinary file, redirecting:', fetchErr);
+        }
+        return NextResponse.redirect(clip.storage_path);
+      }
+
+      // Legacy Supabase Storage file
       const { data: signedData, error: signError } = await supabase.storage
         .from('skybox-vault')
         .createSignedUrl(clip.storage_path, 300, {
