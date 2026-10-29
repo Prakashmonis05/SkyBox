@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { Cloud, Shield } from 'lucide-react';
+import Image from 'next/image';
+import { Shield } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -7,9 +8,15 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="md:col-span-2 space-y-3">
-            <Link href="/" className="inline-flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-sm shadow-blue-500/20">
-                <Cloud className="w-4 h-4" />
+            <Link href="/" className="inline-flex items-center gap-2.5 group">
+              <div className="relative w-8 h-8 rounded-xl overflow-hidden shadow-xs shrink-0 group-hover:scale-105 transition-transform">
+                <Image
+                  src="/logo.png"
+                  alt="SkyBox Logo"
+                  width={32}
+                  height={32}
+                  className="w-full h-full object-cover"
+                />
               </div>
               <span className="text-xl font-bold tracking-tight text-slate-900">
                 Sky<span className="text-blue-600">Box</span>

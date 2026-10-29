@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import {
   getUserStorageUsage,
@@ -106,8 +107,14 @@ export default function Sidebar({ isOpen, onClose, initialUsedBytes = 0 }) {
         {/* App Logo & Header */}
         <div className="h-16 px-6 flex items-center justify-between border-b border-slate-100">
           <Link href="/dashboard" className="flex items-center gap-2.5 group">
-            <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-sm shadow-blue-500/20 group-hover:bg-blue-700 transition">
-              <Cloud className="w-5 h-5" />
+            <div className="relative w-9 h-9 rounded-xl overflow-hidden shadow-xs group-hover:scale-105 transition-transform shrink-0">
+              <Image
+                src="/logo.png"
+                alt="SkyBox Logo"
+                width={36}
+                height={36}
+                className="w-full h-full object-cover"
+              />
             </div>
             <div className="flex flex-col">
               <span className="text-xl font-bold tracking-tight text-slate-900 leading-none">

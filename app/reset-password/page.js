@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Cloud, Lock, ArrowRight, AlertCircle, Loader2, CheckCircle2 } from 'lucide-react';
@@ -56,9 +57,16 @@ export default function ResetPasswordPage() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <Link href="/" className="inline-flex items-center gap-2.5 group">
-          <div className="w-11 h-11 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20 group-hover:bg-blue-700 transition">
-            <Cloud className="w-6 h-6" />
+        <Link href="/" className="inline-flex items-center gap-3 group">
+          <div className="relative w-11 h-11 rounded-xl overflow-hidden shadow-sm group-hover:scale-105 transition-transform shrink-0">
+            <Image
+              src="/logo.png"
+              alt="SkyBox Logo"
+              width={44}
+              height={44}
+              priority
+              className="w-full h-full object-cover"
+            />
           </div>
           <span className="text-2xl font-bold tracking-tight text-slate-900">
             Sky<span className="text-blue-600">Box</span>
