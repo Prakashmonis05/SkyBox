@@ -100,6 +100,18 @@ function FilesExplorer() {
 
   useEffect(() => {
     fetchDirectoryContents();
+
+    const handleUpdate = () => {
+      fetchDirectoryContents();
+    };
+
+    window.addEventListener('skybox:storage-updated', handleUpdate);
+    window.addEventListener('focus', handleUpdate);
+
+    return () => {
+      window.removeEventListener('skybox:storage-updated', handleUpdate);
+      window.removeEventListener('focus', handleUpdate);
+    };
   }, [folderId]);
 
   const handleOpenFolder = (targetFolder) => {

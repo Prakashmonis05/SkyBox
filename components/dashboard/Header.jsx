@@ -25,7 +25,7 @@ import UploadModal from './UploadModal';
 import TextEditorModal from './TextEditorModal';
 import FilePreviewModal from './FilePreviewModal';
 import { getFileTypeIcon } from './FileItem';
-import { formatBytes } from '@/lib/files';
+import { formatBytes, notifyStorageUpdated } from '@/lib/files';
 
 function HeaderContent({ onMenuClick, user, profile }) {
   const router = useRouter();
@@ -132,7 +132,10 @@ function HeaderContent({ onMenuClick, user, profile }) {
         onClose={() => setNewFolderModalOpen(false)}
         parentId={currentFolderId}
         parentName={currentFolderId ? 'Current Folder' : 'My Files'}
-        onFolderCreated={() => router.refresh()}
+        onFolderCreated={() => {
+          notifyStorageUpdated();
+          router.refresh();
+        }}
       />
 
       <UploadModal
@@ -140,7 +143,10 @@ function HeaderContent({ onMenuClick, user, profile }) {
         onClose={() => setUploadModalOpen(false)}
         folderId={currentFolderId}
         folderName={currentFolderId ? 'Current Folder' : 'My Files'}
-        onUploadComplete={() => router.refresh()}
+        onUploadComplete={() => {
+          notifyStorageUpdated();
+          router.refresh();
+        }}
       />
 
       <TextEditorModal
@@ -152,7 +158,10 @@ function HeaderContent({ onMenuClick, user, profile }) {
         folderId={currentFolderId}
         folderName={currentFolderId ? 'Current Folder' : 'My Files'}
         editingFile={editingTextFile}
-        onFileSaved={() => router.refresh()}
+        onFileSaved={() => {
+          notifyStorageUpdated();
+          router.refresh();
+        }}
       />
 
       <FilePreviewModal

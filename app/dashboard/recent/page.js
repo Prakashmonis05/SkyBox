@@ -56,6 +56,18 @@ export default function RecentPage() {
 
   useEffect(() => {
     fetchRecent();
+
+    const handleUpdate = () => {
+      fetchRecent();
+    };
+
+    window.addEventListener('skybox:storage-updated', handleUpdate);
+    window.addEventListener('focus', handleUpdate);
+
+    return () => {
+      window.removeEventListener('skybox:storage-updated', handleUpdate);
+      window.removeEventListener('focus', handleUpdate);
+    };
   }, []);
 
   const handleEditTextFile = (file) => {

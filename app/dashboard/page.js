@@ -98,7 +98,6 @@ export default function DashboardHomePage() {
       setFileCount(fileExactCount || 0);
       setTrashCount((trashedFolderCount || 0) + (trashedFileCount || 0));
       setUsedBytes(storageUsage.totalBytes);
-      notifyStorageUpdated(storageUsage);
     } catch (err) {
       console.error('Error fetching home data:', err);
     } finally {
@@ -108,6 +107,18 @@ export default function DashboardHomePage() {
 
   useEffect(() => {
     fetchHomeData();
+
+    const handleUpdate = () => {
+      fetchHomeData();
+    };
+
+    window.addEventListener('skybox:storage-updated', handleUpdate);
+    window.addEventListener('focus', handleUpdate);
+
+    return () => {
+      window.removeEventListener('skybox:storage-updated', handleUpdate);
+      window.removeEventListener('focus', handleUpdate);
+    };
   }, []);
 
   const handleQuickAction = (actionName) => {

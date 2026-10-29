@@ -711,10 +711,11 @@ export default function OnlineClipboard({
                   <input
                     id="receive-code-input"
                     type="text"
+                    inputMode="numeric"
                     maxLength={15}
                     value={inputCode}
                     onChange={(e) => setInputCode(e.target.value.toUpperCase())}
-                    placeholder="e.g. SKY-4921"
+                    placeholder="e.g. 482910"
                     className="w-full rounded-xl border border-slate-200 pl-9 pr-3 py-2 text-base sm:text-sm font-mono font-bold tracking-wider uppercase text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 bg-slate-50/50 hover:bg-white focus:bg-white transition"
                   />
                 </div>
