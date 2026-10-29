@@ -11,7 +11,18 @@ export default function StorageCard({ usedBytes = 0, totalBytes = 1073741824 }) 
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
   };
 
-  const percentage = Math.min(100, Math.round((usedBytes / totalBytes) * 100));
+  const rawPercentage = (usedBytes / totalBytes) * 100;
+  const displayPercentage =
+    usedBytes === 0
+      ? '0%'
+      : rawPercentage < 0.1
+      ? '< 0.1%'
+      : rawPercentage < 1
+      ? `${rawPercentage.toFixed(1)}%`
+      : `${Math.min(100, Math.round(rawPercentage))}%`;
+
+  const barWidth =
+    usedBytes === 0 ? 0 : Math.max(Math.min(100, rawPercentage), 2);
 
   return (
     <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-4">
@@ -25,7 +36,7 @@ export default function StorageCard({ usedBytes = 0, totalBytes = 1073741824 }) 
               Vault Storage Space
             </h4>
             <p className="text-xs text-slate-500">
-              Free Tier Allocation
+              Free Tier Allocation (1 GB Limit)
             </p>
           </div>
         </div>
@@ -42,8 +53,14 @@ export default function StorageCard({ usedBytes = 0, totalBytes = 1073741824 }) 
 
       <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
         <div
-          className="bg-blue-600 h-full rounded-full transition-all duration-500"
-          style={{ width: `${Math.max(percentage, 1)}%` }}
+          className={`h-full rounded-full transition-all duration-500 ${
+            rawPercentage >= 90
+              ? 'bg-red-500'
+              : rawPercentage >= 75
+              ? 'bg-amber-500'
+              : 'bg-blue-600'
+          }`}
+          style={{ width: `${barWidth}%` }}
         />
       </div>
 
@@ -52,7 +69,17 @@ export default function StorageCard({ usedBytes = 0, totalBytes = 1073741824 }) 
           <ShieldCheck className="w-4 h-4" />
           <span>Storage Isolated with Supabase RLS</span>
         </span>
-        <span>{percentage}% used</span>
+        <span
+          className={`font-semibold ${
+            rawPercentage >= 90
+              ? 'text-red-600'
+              : rawPercentage >= 75
+              ? 'text-amber-600'
+              : 'text-slate-600'
+          }`}
+        >
+          {displayPercentage} used
+        </span>
       </div>
     </div>
   );

@@ -51,14 +51,13 @@ function LoginForm() {
         return;
       }
 
-      // Check if user email is unconfirmed
-      if (data?.user && !data.user.email_confirmed_at) {
+      // Check if session was not returned and user email is unconfirmed
+      if (data?.user && !data.user.email_confirmed_at && !data?.session) {
         router.push(`/verify-email?email=${encodeURIComponent(email)}&redirectTo=${encodeURIComponent(redirectTo)}`);
         return;
       }
 
-      router.push(redirectTo);
-      router.refresh();
+      window.location.href = redirectTo || '/dashboard';
     } catch (err) {
       setErrorMessage(err.message || 'An unexpected error occurred.');
       setLoading(false);

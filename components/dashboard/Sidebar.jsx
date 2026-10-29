@@ -1,7 +1,13 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import {
+  getUserStorageUsage,
+  formatBytes,
+  STORAGE_LIMIT_BYTES,
+} from '@/lib/files';
 import {
   Cloud,
   HardDrive,
@@ -13,8 +19,6 @@ import {
   X,
   Database,
   ClipboardList,
-  Share2,
-  ExternalLink
 } from 'lucide-react';
 
 const navItems = [
@@ -27,8 +31,62 @@ const navItems = [
   { name: 'Settings', href: '/dashboard/settings', icon: Settings },
 ];
 
-export default function Sidebar({ isOpen, onClose }) {
+export default function Sidebar({ isOpen, onClose, initialUsedBytes = 0 }) {
   const pathname = usePathname();
+  const [usedBytes, setUsedBytes] = useState(initialUsedBytes);
+
+  useEffect(() => {
+    if (initialUsedBytes > 0) {
+      setUsedBytes(initialUsedBytes);
+    }
+  }, [initialUsedBytes]);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchStorage = () => {
+      getUserStorageUsage()
+        .then((u) => {
+          if (isMounted && typeof u?.totalBytes === 'number') {
+            setUsedBytes(u.totalBytes);
+          }
+        })
+        .catch(() => {});
+    };
+
+    fetchStorage();
+
+    const handleStorageEvent = (e) => {
+      if (typeof e?.detail?.totalBytes === 'number') {
+        if (isMounted) setUsedBytes(e.detail.totalBytes);
+      } else {
+        fetchStorage();
+      }
+    };
+
+    // Re-fetch automatically when files are uploaded, deleted, restored, or edited
+    window.addEventListener('skybox:storage-updated', handleStorageEvent);
+    window.addEventListener('focus', fetchStorage);
+
+    return () => {
+      isMounted = false;
+      window.removeEventListener('skybox:storage-updated', handleStorageEvent);
+      window.removeEventListener('focus', fetchStorage);
+    };
+  }, [pathname]);
+
+  const rawPercentage = (usedBytes / STORAGE_LIMIT_BYTES) * 100;
+  const displayPercentage =
+    usedBytes === 0
+      ? '0%'
+      : rawPercentage < 0.1
+      ? '< 0.1%'
+      : rawPercentage < 1
+      ? `${rawPercentage.toFixed(1)}%`
+      : `${Math.min(100, Math.round(rawPercentage))}%`;
+
+  const barWidth =
+    usedBytes === 0 ? 0 : Math.max(Math.min(100, rawPercentage), 2);
+  const remainingBytes = Math.max(0, STORAGE_LIMIT_BYTES - usedBytes);
 
   return (
     <>
@@ -119,19 +177,35 @@ export default function Sidebar({ isOpen, onClose }) {
                 <Database className="w-3.5 h-3.5 text-blue-600" />
                 <span>Vault Storage</span>
               </span>
-              <span className="text-blue-600 font-medium">0%</span>
+              <span
+                className={`font-semibold ${
+                  rawPercentage >= 90
+                    ? 'text-red-600'
+                    : rawPercentage >= 75
+                    ? 'text-amber-600'
+                    : 'text-blue-600'
+                }`}
+              >
+                {displayPercentage}
+              </span>
             </div>
 
             <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
               <div
-                className="bg-blue-600 h-full rounded-full transition-all duration-300"
-                style={{ width: '1%' }}
+                className={`h-full rounded-full transition-all duration-500 ${
+                  rawPercentage >= 90
+                    ? 'bg-red-500'
+                    : rawPercentage >= 75
+                    ? 'bg-amber-500'
+                    : 'bg-blue-600'
+                }`}
+                style={{ width: `${barWidth}%` }}
               />
             </div>
 
             <div className="flex items-center justify-between text-[11px] text-slate-500">
-              <span>0 B used</span>
-              <span>1 GB free</span>
+              <span>{formatBytes(usedBytes)} used</span>
+              <span>{formatBytes(remainingBytes)} free</span>
             </div>
           </div>
         </div>

@@ -1,13 +1,21 @@
 'use client';
 
-import { Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { ClipboardList, Clock, Sparkles } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ClipboardList, Clock } from 'lucide-react';
 import OnlineClipboard from '@/components/OnlineClipboard';
 
-function DashboardClipboardContent() {
-  const searchParams = useSearchParams();
-  const shareFileId = searchParams?.get('shareFileId') || '';
+export default function DashboardClipboardPage() {
+  const [shareFileId, setShareFileId] = useState('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const fileId = params.get('shareFileId');
+      if (fileId) {
+        setShareFileId(fileId);
+      }
+    }
+  }, []);
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
@@ -31,16 +39,3 @@ function DashboardClipboardContent() {
   );
 }
 
-export default function DashboardClipboardPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="p-12 text-center text-slate-400">
-          Loading clipboard...
-        </div>
-      }
-    >
-      <DashboardClipboardContent />
-    </Suspense>
-  );
-}

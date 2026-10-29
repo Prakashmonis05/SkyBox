@@ -57,8 +57,8 @@ export default function RegisterPage() {
 
       // Check if session was created immediately or if email confirmation is required
       if (data?.session) {
-        router.push('/dashboard');
-        router.refresh();
+        window.location.href = '/dashboard';
+        return;
       } else {
         router.push(`/verify-email?email=${encodeURIComponent(email)}`);
       }

@@ -1,7 +1,10 @@
 import { NextResponse } from 'next/server';
 import cloudinary, { isCloudinaryConfigured } from '@/lib/cloudinary';
+import { createClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
+
+const STORAGE_LIMIT_BYTES = 1024 * 1024 * 1024; // 1 GB (1,073,741,824 bytes)
 
 export async function POST(request) {
   try {
@@ -38,6 +41,40 @@ export async function POST(request) {
 
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
+
+    // Verify 1 GB storage limit per user server-side
+    try {
+      const supabase = await createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user) {
+        const { data: userFiles, error: usageError } = await supabase
+          .from('files')
+          .select('size_bytes')
+          .eq('user_id', user.id)
+          .is('deleted_at', null);
+
+        if (!usageError && userFiles) {
+          const totalUsed = userFiles.reduce(
+            (acc, f) => acc + (Number(f.size_bytes) || 0),
+            0
+          );
+          if (totalUsed + buffer.length > STORAGE_LIMIT_BYTES) {
+            const remaining = Math.max(0, STORAGE_LIMIT_BYTES - totalUsed);
+            return NextResponse.json(
+              {
+                error: `Storage quota exceeded (1 GB limit). You have ${(remaining / (1024 * 1024)).toFixed(1)} MB remaining space.`,
+              },
+              { status: 403 }
+            );
+          }
+        }
+      }
+    } catch (authErr) {
+      // In demo mode or if auth bypass is active, proceed
+    }
 
     const safeName = (file.name || 'file')
       .replace(/[^a-zA-Z0-9._-]/g, '_')

@@ -2,6 +2,8 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import DashboardClientLayout from './DashboardClientLayout';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'Dashboard — SkyBox',
   description: 'Your personal cloud space. Anywhere.',
@@ -13,20 +15,21 @@ export default async function DashboardLayout({ children }) {
 
   let user = null;
   let profile = null;
+  let initialUsedBytes = 0;
 
   if (!isPlaceholder) {
+    const supabase = await createClient();
+    const {
+      data: { user: authUser },
+    } = await supabase.auth.getUser();
+
+    if (!authUser) {
+      redirect('/login');
+    }
+
+    user = authUser;
+
     try {
-      const supabase = await createClient();
-      const {
-        data: { user: authUser },
-      } = await supabase.auth.getUser();
-
-      if (!authUser) {
-        redirect('/login');
-      }
-
-      user = authUser;
-
       const { data: userProfile } = await supabase
         .from('profiles')
         .select('*')
@@ -34,12 +37,19 @@ export default async function DashboardLayout({ children }) {
         .single();
 
       profile = userProfile;
+
+      // Fetch initial user storage usage directly on server
+      const { data: userFiles } = await supabase
+        .from('files')
+        .select('size_bytes')
+        .is('deleted_at', null);
+
+      initialUsedBytes = (userFiles || []).reduce(
+        (acc, curr) => acc + (Number(curr.size_bytes) || 0),
+        0
+      );
     } catch (error) {
-      console.error('Error fetching dashboard user:', error);
-      // If error is NEXT_REDIRECT, rethrow it
-      if (error?.digest?.startsWith('NEXT_REDIRECT')) {
-        throw error;
-      }
+      console.warn('Non-fatal error fetching dashboard profile/files on server:', error);
     }
   } else {
     // Development fallback when credentials are not yet configured
@@ -56,7 +66,11 @@ export default async function DashboardLayout({ children }) {
   }
 
   return (
-    <DashboardClientLayout user={user} profile={profile}>
+    <DashboardClientLayout
+      user={user}
+      profile={profile}
+      initialUsedBytes={initialUsedBytes}
+    >
       {children}
     </DashboardClientLayout>
   );

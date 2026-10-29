@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   UploadCloud,
   X,
@@ -8,9 +8,16 @@ import {
   CheckCircle2,
   AlertCircle,
   Loader2,
-  Folder
+  Folder,
+  Database,
 } from 'lucide-react';
-import { uploadFile, formatBytes, MAX_FILE_SIZE_BYTES } from '@/lib/files';
+import {
+  uploadFile,
+  formatBytes,
+  MAX_FILE_SIZE_BYTES,
+  STORAGE_LIMIT_BYTES,
+  getUserStorageUsage,
+} from '@/lib/files';
 
 export default function UploadModal({
   isOpen,
@@ -23,21 +30,44 @@ export default function UploadModal({
   const [uploading, setUploading] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const [globalError, setGlobalError] = useState('');
+  const [usedStorageBytes, setUsedStorageBytes] = useState(0);
   const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      getUserStorageUsage()
+        .then((u) => setUsedStorageBytes(u.totalBytes))
+        .catch(() => {});
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
   const handleFileSelection = (fileList) => {
     setGlobalError('');
+    let runningTotal =
+      usedStorageBytes +
+      selectedFiles.reduce(
+        (acc, f) => acc + (f.status !== 'error' ? f.size : 0),
+        0
+      );
+
     const newFiles = Array.from(fileList).map((f) => {
       const isOversized = f.size > MAX_FILE_SIZE_BYTES;
+      runningTotal += f.size;
+      const exceedsStorage = runningTotal > STORAGE_LIMIT_BYTES;
+
       return {
         raw: f,
         name: f.name,
         size: f.size,
         progress: 0,
-        status: isOversized ? 'error' : 'idle',
-        error: isOversized ? 'Exceeds 50MB limit' : '',
+        status: isOversized || exceedsStorage ? 'error' : 'idle',
+        error: isOversized
+          ? 'Exceeds 50MB per-file limit'
+          : exceedsStorage
+          ? 'Exceeds 1 GB total storage quota'
+          : '',
       };
     });
 
@@ -146,6 +176,22 @@ export default function UploadModal({
             <span>{globalError}</span>
           </div>
         )}
+
+        {/* Quota Indicator */}
+        <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between text-xs">
+          <div className="flex items-center gap-2 text-slate-600">
+            <Database className="w-4 h-4 text-blue-600" />
+            <span>
+              Available Space:{' '}
+              <strong className="text-slate-900 font-bold">
+                {formatBytes(Math.max(0, STORAGE_LIMIT_BYTES - usedStorageBytes))}
+              </strong>
+            </span>
+          </div>
+          <span className="text-[11px] font-semibold text-slate-500 bg-white px-2 py-0.5 rounded-md border border-slate-200">
+            1 GB Limit
+          </span>
+        </div>
 
         {/* Drag & Drop Zone */}
         <div

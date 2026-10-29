@@ -5,7 +5,12 @@ import Sidebar from '@/components/dashboard/Sidebar';
 import Header from '@/components/dashboard/Header';
 import SessionTimeoutWatcher from '@/components/dashboard/SessionTimeoutWatcher';
 
-export default function DashboardClientLayout({ user, profile, children }) {
+export default function DashboardClientLayout({
+  user,
+  profile,
+  initialUsedBytes = 0,
+  children,
+}) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
@@ -14,7 +19,11 @@ export default function DashboardClientLayout({ user, profile, children }) {
       <SessionTimeoutWatcher />
 
       {/* Sidebar navigation */}
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <Sidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        initialUsedBytes={initialUsedBytes}
+      />
 
       {/* Main dashboard content area */}
       <div className="flex-1 flex flex-col md:pl-64 min-w-0">

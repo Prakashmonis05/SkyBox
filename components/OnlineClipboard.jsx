@@ -16,7 +16,6 @@ import {
   AlertCircle,
   CheckCircle2,
   ExternalLink,
-  Sparkles,
   Cloud,
   X,
   Search,
@@ -353,11 +352,11 @@ export default function OnlineClipboard({
     <div id="clipboard" className={`w-full ${className}`}>
       {/* Top Tab Switcher */}
       <div className="flex justify-center mb-2.5 sm:mb-3">
-        <div className="inline-flex p-1 bg-slate-200/80 rounded-xl border border-slate-200 shadow-inner">
+        <div className="inline-flex w-full sm:w-auto p-1 bg-slate-200/80 rounded-xl border border-slate-200 shadow-inner">
           <button
             type="button"
             onClick={() => setActiveTab('share')}
-            className={`flex items-center gap-1.5 px-4 py-1.5 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition cursor-pointer ${
+            className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 sm:px-5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all active:scale-[0.98] cursor-pointer ${
               activeTab === 'share'
                 ? 'bg-white text-blue-600 shadow-xs'
                 : 'text-slate-600 hover:text-slate-900'
@@ -369,7 +368,7 @@ export default function OnlineClipboard({
           <button
             type="button"
             onClick={() => setActiveTab('receive')}
-            className={`flex items-center gap-1.5 px-4 py-1.5 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition cursor-pointer ${
+            className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 sm:px-5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all active:scale-[0.98] cursor-pointer ${
               activeTab === 'receive'
                 ? 'bg-white text-blue-600 shadow-xs'
                 : 'text-slate-600 hover:text-slate-900'
@@ -382,7 +381,7 @@ export default function OnlineClipboard({
       </div>
 
       {/* Main Card Container */}
-      <div className={`bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 shadow-lg shadow-slate-200/50 transition-all ${
+      <div className={`bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 shadow-md sm:shadow-lg shadow-slate-200/50 transition-all ${
         compact ? 'p-3.5 sm:p-4' : 'p-4.5 sm:p-5 lg:p-6'
       }`}>
         {/* Tab 1: Share Content */}
@@ -522,7 +521,7 @@ export default function OnlineClipboard({
                       placeholder="Paste text, code snippets, passwords, meeting links, or tokens here..."
                       className={`w-full rounded-xl border border-slate-200 ${
                         compact ? 'p-2.5' : 'p-3'
-                      } text-xs sm:text-sm font-mono text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 bg-slate-50/50 hover:bg-white focus:bg-white transition leading-relaxed resize-y`}
+                      } text-base sm:text-sm font-mono text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 bg-slate-50/50 hover:bg-white focus:bg-white transition leading-relaxed resize-y`}
                     />
                   </div>
                 ) : (
@@ -669,7 +668,7 @@ export default function OnlineClipboard({
                     (shareType === 'text' && !content.trim()) ||
                     (shareType === 'file' && !selectedFile && !selectedCloudFile)
                   }
-                  className="w-full py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm shadow-md shadow-blue-500/20 transition flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  className="w-full min-h-[44px] py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white font-semibold text-xs sm:text-sm shadow-md shadow-blue-500/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
                 >
                   {creating ? (
                     <>
@@ -716,13 +715,13 @@ export default function OnlineClipboard({
                     value={inputCode}
                     onChange={(e) => setInputCode(e.target.value.toUpperCase())}
                     placeholder="e.g. SKY-4921"
-                    className="w-full rounded-xl border border-slate-200 pl-9 pr-3 py-2 text-xs sm:text-sm font-mono font-bold tracking-wider uppercase text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 bg-slate-50/50 hover:bg-white focus:bg-white transition"
+                    className="w-full rounded-xl border border-slate-200 pl-9 pr-3 py-2 text-base sm:text-sm font-mono font-bold tracking-wider uppercase text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 bg-slate-50/50 hover:bg-white focus:bg-white transition"
                   />
                 </div>
                 <button
                   type="submit"
                   disabled={retrieving || !inputCode.trim()}
-                  className="py-2 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  className="py-2 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-semibold text-xs sm:text-sm transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                 >
                   {retrieving ? (
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />

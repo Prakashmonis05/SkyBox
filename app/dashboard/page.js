@@ -33,6 +33,7 @@ import {
   getUserStorageUsage,
   downloadFile,
   toggleStarFile,
+  notifyStorageUpdated,
 } from '@/lib/files';
 
 export default function DashboardHomePage() {
@@ -97,6 +98,7 @@ export default function DashboardHomePage() {
       setFileCount(fileExactCount || 0);
       setTrashCount((trashedFolderCount || 0) + (trashedFileCount || 0));
       setUsedBytes(storageUsage.totalBytes);
+      notifyStorageUpdated(storageUsage);
     } catch (err) {
       console.error('Error fetching home data:', err);
     } finally {

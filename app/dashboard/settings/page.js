@@ -4,6 +4,11 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import {
+  getUserStorageUsage,
+  formatBytes,
+  STORAGE_LIMIT_BYTES,
+} from '@/lib/files';
+import {
   Settings,
   User,
   Mail,
@@ -15,7 +20,8 @@ import {
   AlertCircle,
   Loader2,
   Calendar,
-  Lock
+  Lock,
+  Database,
 } from 'lucide-react';
 
 export default function SettingsPage() {
@@ -23,6 +29,7 @@ export default function SettingsPage() {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [fullName, setFullName] = useState('');
+  const [usedBytes, setUsedBytes] = useState(0);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
@@ -52,6 +59,12 @@ export default function SettingsPage() {
           } else {
             setFullName(authUser.user_metadata?.full_name || '');
           }
+
+          // Fetch storage quota usage
+          try {
+            const usage = await getUserStorageUsage();
+            setUsedBytes(usage.totalBytes);
+          } catch {}
         }
       } catch (err) {
         console.error('Error fetching user:', err);
@@ -223,6 +236,51 @@ export default function SettingsPage() {
             <span>Save Profile</span>
           </button>
         </form>
+      </div>
+
+      {/* Storage Quota & Plan */}
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs p-6 space-y-5">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-sm font-bold text-slate-900">Storage Quota & Plan</h2>
+            <p className="text-xs text-slate-500">
+              Your personal cloud allocation and usage.
+            </p>
+          </div>
+          <span className="px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200 text-xs font-semibold">
+            1 GB Free Tier
+          </span>
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-xs font-medium">
+            <span className="text-slate-600">Storage Used</span>
+            <span className="text-slate-900 font-bold font-mono">
+              {formatBytes(usedBytes)} / 1 GB ({Math.min(100, Math.round((usedBytes / STORAGE_LIMIT_BYTES) * 100))}%)
+            </span>
+          </div>
+          <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all duration-500 ${
+                usedBytes / STORAGE_LIMIT_BYTES >= 0.9
+                  ? 'bg-red-500'
+                  : usedBytes / STORAGE_LIMIT_BYTES >= 0.75
+                  ? 'bg-amber-500'
+                  : 'bg-blue-600'
+              }`}
+              style={{
+                width: `${Math.max(
+                  Math.min(100, Math.round((usedBytes / STORAGE_LIMIT_BYTES) * 100)),
+                  1
+                )}%`,
+              }}
+            />
+          </div>
+          <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1">
+            <span>Enforced on all uploads & notes</span>
+            <span>{formatBytes(Math.max(0, STORAGE_LIMIT_BYTES - usedBytes))} available</span>
+          </div>
+        </div>
       </div>
 
       {/* Account & Security Information */}
